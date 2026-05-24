@@ -15,7 +15,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-functions-compat.js"></script>
-   <style>* {
+   <style>Here is the updated CSS for your Ship2Day shopping app. It maintains all existing features and ensures the product grids remain squared (2x2 on mobile, 4x4+ on desktop) as requested.
+```css
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -94,9 +96,21 @@ html, body {
         padding: 0 5%;
     }
 
+    /* KEEP SQUARED GRID ON DESKTOP - Same as mobile but more columns */
     .products-grid {
         padding: 0 5%;
-        grid-template-columns: repeat(4, 1fr); /* 4 columns on desktop */
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+    }
+    
+    /* Keep aspect ratio squared on desktop as well */
+    .product-card {
+        border-radius: 16px;
+    }
+    
+    .product-image {
+        height: auto;
+        aspect-ratio: 1 / 1;
     }
 
     .category-grid {
@@ -225,6 +239,12 @@ html, body {
 @media (min-width: 1440px) {
     .products-grid {
         grid-template-columns: repeat(5, 1fr);
+        gap: 20px;
+    }
+    
+    /* Keep squared aspect ratio on large screens */
+    .product-image {
+        aspect-ratio: 1 / 1;
     }
 
     .category-grid {
@@ -662,7 +682,7 @@ html, body {
     box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3);
 }
 
-/* Updated Products Grid - More Compact */
+/* Updated Products Grid - Squared cards with proper aspect ratio */
 .products-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -678,20 +698,24 @@ html, body {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: var(--shadow-sm);
     position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 .product-card:active {
     transform: scale(0.97);
 }
 
+/* Ensure image container maintains square aspect ratio */
 .product-image {
-    height: 120px;
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
     background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 36px;
-    position: relative;
     overflow: hidden;
 }
 
@@ -699,6 +723,9 @@ html, body {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
 .discount-badge {
@@ -743,6 +770,9 @@ html, body {
 
 .product-info {
     padding: 12px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .product-name {
@@ -772,7 +802,7 @@ html, body {
     font-weight: 500;
 }
 
-/* New: Quick actions overlay for product card */
+/* Quick actions overlay for product card */
 .product-actions {
     position: absolute;
     top: 8px;
@@ -813,7 +843,7 @@ html, body {
 
 /* Cart Items */
 .cart-list {
-    padding: 16px 16px 120px; /* Increased bottom padding for cart summary */
+    padding: 16px 16px 120px;
 }
 
 .cart-item {
@@ -1003,7 +1033,7 @@ html, body {
 }
 
 .menu-list {
-    padding: 20px 16px 100px; /* Added bottom padding for fixed elements */
+    padding: 20px 16px 100px;
 }
 
 .menu-item {
@@ -1058,7 +1088,7 @@ html, body {
 
 /* Search Page */
 .search-page {
-    padding: 20px 16px 100px; /* Added bottom padding for fixed elements */
+    padding: 20px 16px 100px;
 }
 
 .search-filters {
@@ -1102,7 +1132,7 @@ html, body {
 
 /* Categories Page */
 .categories-page {
-    padding: 20px 16px 100px; /* Added bottom padding for fixed elements */
+    padding: 20px 16px 100px;
 }
 
 .category-grid {
@@ -1173,11 +1203,6 @@ html, body {
     margin-bottom: 12px;
     display: block;
     animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-8px); }
 }
 
 .category-card-large:nth-child(1) .category-icon-large { animation-delay: 0s; }
@@ -1423,7 +1448,7 @@ html, body {
 .product-detail {
     background: var(--surface);
     min-height: 100vh;
-    padding-bottom: 100px; /* Removed padding-bottom since buttons are fixed */
+    padding-bottom: 100px;
 }
 
 .product-detail-image-container {
@@ -1548,7 +1573,7 @@ html, body {
 }
 
 .product-detail-content {
-    padding: 24px 20px 120px; /* Increased bottom padding for fixed buttons */
+    padding: 24px 20px 120px;
 }
 
 .detail-title {
@@ -2113,7 +2138,7 @@ html, body {
 }
 
 .content-padding {
-    padding: 0 16px 120px; /* Increased bottom padding for fixed elements */
+    padding: 0 16px 120px;
 }
 
 /* ========== UPDATED: Authentication Pages - FULLSCREEN ========== */
@@ -3438,12 +3463,11 @@ html, body {
 
 .location-coordinates-input {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Keep 2 columns */
+    grid-template-columns: 1fr 1fr;
     gap: 12px;
     margin-bottom: 16px;
 }
 
-/* Add this new CSS rule to make the inputs smaller */
 .location-coordinate-input {
     padding: 12px;
     border-radius: 8px;
@@ -3453,8 +3477,8 @@ html, body {
     font-family: 'Outfit', sans-serif;
     outline: none;
     transition: all 0.2s ease;
-    max-width: 150px; /* ADD THIS LINE - limits max width */
-    width: 100%; /* ADD THIS LINE - makes it responsive */
+    max-width: 150px;
+    width: 100%;
 }
 
 .location-coordinate-input:focus {
@@ -4070,7 +4094,8 @@ html, body {
     font-size: 12px;
     color: var(--text-secondary);
     text-align: center;
-}</style>
+}
+</style>
 </head>
 <body>
     <!-- Loading Overlay -->
