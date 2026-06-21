@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>MOTO ARIA — Scooters & Motorbikes</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
 <!-- Firebase SDKs -->
@@ -32,7 +32,11 @@
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  html { scroll-behavior: smooth; }
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+    width: 100%;
+  }
 
   body {
     background: var(--bg);
@@ -41,6 +45,11 @@
     font-size: 15px;
     line-height: 1.6;
     overflow-x: hidden;
+    width: 100%;
+    position: relative;
+    overscroll-behavior-y: none;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   a { color: inherit; text-decoration: none; }
@@ -1447,12 +1456,14 @@
   }
 
   @media (max-width: 900px) {
+    html, body { overflow-x: hidden; max-width: 100vw; }
     .hero { grid-template-columns: 1fr; padding-top: 80px; }
     .hero-visual { height: 300px; margin-bottom: 0; }
     .hero-text { padding-right: 0; }
     .featured-banner { grid-template-columns: 1fr; }
     .footer-grid { grid-template-columns: 1fr 1fr; }
     .nav-links { display: none; }
+    .nav-shop-now { display: none; }
     .newsletter-section { padding: 3rem 2rem; }
   }
 
@@ -1839,7 +1850,7 @@
         <!-- Populated by JS based on auth state -->
       </div>
     </div>
-    <a href="#products" class="btn btn-primary">Shop Now</a>
+    <a href="#products" class="btn btn-primary nav-shop-now">Shop Now</a>
   </div>
 </nav>
 
