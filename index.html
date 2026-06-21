@@ -2413,6 +2413,10 @@
 </div>
 
 <script>
+// ── AUTH STATE (declared early so it's always safe to reference) ──
+let currentUser = null;
+let authPendingAction = null; // 'cart' | 'wishlist' | null
+
 // ── PRODUCT DATA (DEMO / FALLBACK — shown until live Firebase data arrives) ──
 const demoProducts = [
   {
@@ -3343,8 +3347,7 @@ function setLiveIndicator(state, text) {
 // ══════════════════════════════════════════════════════════
 // ── AUTH SYSTEM ─────────────────────────────────────────
 // ══════════════════════════════════════════════════════════
-let currentUser = null;
-let authPendingAction = null; // 'cart' | 'wishlist' | null
+// (currentUser / authPendingAction declared at top of script)
 
 // ── Open auth modal ─────────────────────────────────────
 function openAuth(tab, pendingAction) {
