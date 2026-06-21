@@ -3709,49 +3709,6 @@ document.addEventListener('keydown', e => {
 
     setLiveIndicator('loading', 'Connecting to live inventory...');
 
-    // ── AUTO-SEED: push the hardcoded demo catalog into RTDB ──
-    // Runs once — only if Firebase has no products yet. After this,
-    // the storefront always renders from live RTDB data, never the
-    // hardcoded array directly. The demo array still supplies the
-    // SVG illustrations used as instant-loading placeholders.
-    function seedDemoProductsIfEmpty() {
-      return database.ref('products').once('value').then(snapshot => {
-        if (snapshot.exists()) return; // already has live data — don't touch it
-
-        const updates = {};
-        demoProducts.forEach(p => {
-          updates[p.id] = {
-            name: p.name,
-            mainCategoryName: p.category,
-            subCategoryName: p.category,
-            description: p.spec,
-            price: p.price,
-            oldPrice: p.oldPrice || null,
-            badge: p.badge || null,
-            rating: p.rating || 5,
-            tags: p.tags,
-            svgPath: p.svgPath,
-            color: p.color,
-            images: [],          // no real photos yet — SVG placeholder shows until one is uploaded
-            mainImage: null,
-            stock: 10,
-            status: 'active',
-            createdAt: firebase.database.ServerValue.TIMESTAMP,
-            updatedAt: firebase.database.ServerValue.TIMESTAMP
-          };
-        });
-
-        return database.ref('products').update(updates);
-      }).catch(err => {
-        console.error('Failed to seed demo products into RTDB:', err);
-      });
-    }
-
-    seedDemoProductsIfEmpty().then(() => {
-      attachProductsListener();
-    });
-
-    function attachProductsListener() {
     database.ref('products').on('value', (snapshot) => {
       if (!snapshot.exists()) {
         // No products in Firebase yet — keep showing the demo catalog
@@ -3790,7 +3747,6 @@ document.addEventListener('keydown', e => {
       console.error('Firebase products listener error:', error);
       setLiveIndicator('offline', 'Showing preview catalog (live sync unavailable)');
     });
-    }
   } catch (err) {
     console.error('Firebase init error:', err);
     setLiveIndicator('offline', 'Showing preview catalog (live sync unavailable)');
