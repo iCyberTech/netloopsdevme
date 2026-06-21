@@ -3298,21 +3298,26 @@ function mapFirebaseProduct(key, val) {
   // Category label shown on the card
   const category = subCat || mainCat || (tags.includes('scooter') ? 'Scooter' : 'Motorbike');
 
-  // Pick illustration based on type, with stable variety via hashing
+  // Pick illustration based on type, with stable variety via hashing.
+  // If the record already carries an explicit svgPath/color (e.g. from
+  // the auto-seeded demo catalog), use that instead of re-deriving it.
   let poolKey = 'motorbike';
   if (tags.includes('electric')) poolKey = 'electric';
   else if (tags.includes('scooter')) poolKey = 'scooter';
   else if (tags.includes('sport')) poolKey = 'sport';
   const pool = SVG_POOLS[poolKey];
-  const svgPath = pool[hashString(key) % pool.length];
+  const svgPath = val.svgPath || pool[hashString(key) % pool.length];
 
-  const color = tags.includes('electric') ? '#00e5ff' : (tags.includes('sport') ? '#ff4d1a' : '#e8ff00');
+  const color = val.color || (tags.includes('electric') ? '#00e5ff' : (tags.includes('sport') ? '#ff4d1a' : '#e8ff00'));
 
-  // Badge: new arrivals (created within the last 14 days) get a "New" tag
-  let badge = null;
-  const createdAt = Number(val.createdAt) || 0;
-  if (createdAt && (Date.now() - createdAt) < 1000 * 60 * 60 * 24 * 14) {
-    badge = 'new';
+  // Badge: explicit badge from the record wins; otherwise auto-detect
+  // "new" for arrivals created within the last 14 days.
+  let badge = val.badge || null;
+  if (!badge) {
+    const createdAt = Number(val.createdAt) || 0;
+    if (createdAt && (Date.now() - createdAt) < 1000 * 60 * 60 * 24 * 14) {
+      badge = 'new';
+    }
   }
 
   const images = Array.isArray(val.images) ? val.images.filter(Boolean) : (val.mainImage ? [val.mainImage] : []);
@@ -3323,15 +3328,16 @@ function mapFirebaseProduct(key, val) {
     id: key,
     name,
     category,
-    tags,
+    tags: Array.isArray(val.tags) && val.tags.length ? val.tags : tags,
     spec: desc ? (desc.length > 72 ? desc.slice(0, 69) + '…' : desc) : `${category} · Premium Build`,
     price: Number(val.price) || 0,
-    oldPrice: null,
+    oldPrice: val.oldPrice ? Number(val.oldPrice) : null,
     badge,
-    rating: 5,
+    rating: val.rating || 5,
     color,
     svgPath,
     image: images[0] || null,
+    images,
     outOfStock
   };
 }
@@ -3703,6 +3709,49 @@ document.addEventListener('keydown', e => {
 
     setLiveIndicator('loading', 'Connecting to live inventory...');
 
+    // ── AUTO-SEED: push the hardcoded demo catalog into RTDB ──
+    // Runs once — only if Firebase has no products yet. After this,
+    // the storefront always renders from live RTDB data, never the
+    // hardcoded array directly. The demo array still supplies the
+    // SVG illustrations used as instant-loading placeholders.
+    function seedDemoProductsIfEmpty() {
+      return database.ref('products').once('value').then(snapshot => {
+        if (snapshot.exists()) return; // already has live data — don't touch it
+
+        const updates = {};
+        demoProducts.forEach(p => {
+          updates[p.id] = {
+            name: p.name,
+            mainCategoryName: p.category,
+            subCategoryName: p.category,
+            description: p.spec,
+            price: p.price,
+            oldPrice: p.oldPrice || null,
+            badge: p.badge || null,
+            rating: p.rating || 5,
+            tags: p.tags,
+            svgPath: p.svgPath,
+            color: p.color,
+            images: [],          // no real photos yet — SVG placeholder shows until one is uploaded
+            mainImage: null,
+            stock: 10,
+            status: 'active',
+            createdAt: firebase.database.ServerValue.TIMESTAMP,
+            updatedAt: firebase.database.ServerValue.TIMESTAMP
+          };
+        });
+
+        return database.ref('products').update(updates);
+      }).catch(err => {
+        console.error('Failed to seed demo products into RTDB:', err);
+      });
+    }
+
+    seedDemoProductsIfEmpty().then(() => {
+      attachProductsListener();
+    });
+
+    function attachProductsListener() {
     database.ref('products').on('value', (snapshot) => {
       if (!snapshot.exists()) {
         // No products in Firebase yet — keep showing the demo catalog
@@ -3741,6 +3790,7 @@ document.addEventListener('keydown', e => {
       console.error('Firebase products listener error:', error);
       setLiveIndicator('offline', 'Showing preview catalog (live sync unavailable)');
     });
+    }
   } catch (err) {
     console.error('Firebase init error:', err);
     setLiveIndicator('offline', 'Showing preview catalog (live sync unavailable)');
