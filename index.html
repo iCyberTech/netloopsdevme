@@ -147,10 +147,17 @@
     padding: 64px 5vw 0;
     position: relative;
     overflow: visible;
-    background-image: url('hero.png');
+    background-image: url('hero.png'); /* mobile default */
     background-size: cover;
     background-position: center top;
     background-repeat: no-repeat;
+  }
+
+  /* Desktop/tablet — swap in the wider hero image */
+  @media (min-width: 901px) {
+    .hero {
+      background-image: url('hero2.png');
+    }
   }
 
   .hero::after {
