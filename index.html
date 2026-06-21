@@ -3083,10 +3083,57 @@ function showNotif(msg) {
 
 // ── NEWSLETTER ─────────────────────────────────────────────
 function subscribeEmail() {
-  const val = document.getElementById('emailInput').value;
+  const input = document.getElementById('emailInput');
+  const val = input.value.trim();
   if (!val || !val.includes('@')) { showNotif('Enter a valid email!'); return; }
-  document.getElementById('emailInput').value = '';
-  showNotif('You\'re on the list. Welcome!');
+
+  const btn = document.querySelector('.newsletter-form .btn');
+  const originalText = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = 'Subscribing...'; }
+
+  saveSubscriberToDatabase(val)
+    .then(() => {
+      input.value = '';
+      showNotif("You're on the list. Welcome!");
+    })
+    .catch(() => {
+      showNotif('Something went wrong. Try again.');
+    })
+    .finally(() => {
+      if (btn) { btn.disabled = false; btn.textContent = originalText; }
+    });
+}
+
+// ── Save newsletter subscriber to Firebase Realtime Database ──
+// Stored under newsletterSubscribers/{sanitizedEmailKey} so re-subscribing
+// the same email updates the existing record instead of duplicating it.
+function saveSubscriberToDatabase(email) {
+  if (typeof firebase === 'undefined' || !firebase.database) {
+    return Promise.resolve(); // gracefully no-op if Firebase isn't available
+  }
+
+  // Firebase RTDB keys can't contain '.', '#', '$', '[', ']', '/'
+  const key = email.toLowerCase().replace(/[.#$\[\]\/]/g, '_');
+  const ref = firebase.database().ref('newsletterSubscribers/' + key);
+  const now = firebase.database.ServerValue.TIMESTAMP;
+
+  return ref.once('value').then(snapshot => {
+    const data = {
+      email: email.toLowerCase(),
+      updatedAt: now
+    };
+    if (currentUser) {
+      data.uid = currentUser.uid;
+      data.name = currentUser.displayName || '';
+    }
+    if (!snapshot.exists()) {
+      data.subscribedAt = now;
+    }
+    return ref.update(data);
+  }).catch(err => {
+    console.error('Failed to save subscriber to database:', err);
+    throw err;
+  });
 }
 
 // ── INIT ───────────────────────────────────────────────────
